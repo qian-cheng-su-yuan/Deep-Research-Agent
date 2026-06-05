@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Deep Research Agent</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="dashboard-shell">
+      <section class="hero-panel" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Planner · Searcher · Writer · Reviewer · Exporter</p>
+          <h1 id="page-title">Deep Research Agent</h1>
+          <p class="lead">
+            输入一个调研主题，自动拆解大纲、检索资料、撰写章节并导出结构化 Markdown 报告。
+          </p>
+        </div>
+        <div class="metric-strip" aria-label="工作流概览">
+          <div>
+            <strong>5</strong>
+            <span>Agent 节点</span>
+          </div>
+          <div>
+            <strong>Markdown</strong>
+            <span>报告输出</span>
+          </div>
+          <div>
+            <strong>Demo</strong>
+            <span>无 Key 可演示</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace-grid">
+        <form class="control-panel" id="research-form">
+          <div class="section-heading">
+            <span class="step-dot">1</span>
+            <div>
+              <h2>调研任务</h2>
+              <p>配置主题、模型模式和输出目录。</p>
+            </div>
+          </div>
+
+          <label class="field">
+            <span>研究主题</span>
+            <textarea
+              id="topic"
+              name="topic"
+              rows="4"
+              placeholder="例如：新能源汽车行业竞争格局分析"
+              required
+            >新能源汽车行业竞争格局分析</textarea>
+          </label>
+
+          <div class="field-row">
+            <label class="field">
+              <span>模型提供商</span>
+              <select id="provider" name="provider">
+                <option value="demo">Demo 本地模式</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="qwen">Qwen</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>输出目录</span>
+              <input id="output-dir" name="output_dir" value="outputs" />
+            </label>
+          </div>
+
+          <label class="toggle-row">
+            <input id="demo" type="checkbox" checked />
+            <span>使用 Demo 模式，适合无 API Key 的本地演示</span>
+          </label>
+
+          <button class="primary-action" type="submit">
+            <span>生成报告</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 12h12m0 0-5-5m5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+
+          <p class="form-message" id="form-message" role="status"></p>
+        </form>
+
+        <section class="result-panel" aria-live="polite">
+          <div class="section-heading">
+            <span class="step-dot">2</span>
+            <div>
+              <h2>运行结果</h2>
+              <p>查看流程状态、审核结果和报告内容。</p>
+            </div>
+          </div>
+
+          <div class="pipeline" id="pipeline">
+            <span data-node="Planner">Planner</span>
+            <span data-node="Searcher">Searcher</span>
+            <span data-node="Writer">Writer</span>
+            <span data-node="Reviewer">Reviewer</span>
+            <span data-node="Exporter">Exporter</span>
+          </div>
+
+          <div class="status-grid">
+            <div>
+              <small>报告路径</small>
+              <strong id="report-path">等待生成</strong>
+            </div>
+            <div>
+              <small>审核状态</small>
+              <strong id="review-status">未开始</strong>
+            </div>
+          </div>
+
+          <article class="report-preview" id="report-preview">
+            <div class="empty-state">
+              <h3>报告预览将在这里出现</h3>
+              <p>点击“生成报告”后，系统会返回完整 Markdown 内容和本地文件路径。</p>
+            </div>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

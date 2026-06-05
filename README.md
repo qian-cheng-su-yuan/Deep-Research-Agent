@@ -13,6 +13,7 @@ Deep Research Agent 是一个面向行业调研、竞品分析和市场分析的
 - 对报告完整性进行基础审核，检查大纲、章节、引用和结论是否齐备。
 - 导出标准 Markdown 文件，适合继续人工修改、发布或转成其他格式。
 - 同时提供命令行和 FastAPI 接口，便于本地演示和后端集成。
+- 提供浏览器前端工作台，可直接输入主题、生成报告并预览结果。
 
 ## 技术栈
 
@@ -43,6 +44,10 @@ Deep-Research-Agent/
 │   ├── test_cli.py
 │   ├── test_llm.py
 │   └── test_workflow.py
+├── web/
+│   ├── index.html      # 前端工作台
+│   ├── styles.css      # 页面样式
+│   └── app.js          # 前端交互逻辑
 ├── .env.example
 ├── pyproject.toml
 └── README.md
@@ -79,6 +84,12 @@ python -m deep_research_agent run "AI Agent 在企业客服中的应用" --demo 
 
 ```bash
 python -m uvicorn deep_research_agent.api:app --reload
+```
+
+浏览器访问：
+
+```text
+http://127.0.0.1:8000
 ```
 
 健康检查：
@@ -167,6 +178,7 @@ python -m pytest
 - 工作流能生成结构化 Markdown 报告。
 - 空主题会被拒绝。
 - `/health` 和 `/api/research` 接口可用。
+- `/` 前端页面和静态资源可访问。
 - CLI 能生成报告文件。
 - Demo LLM 输出稳定。
 - API 调用重试逻辑可处理临时失败。

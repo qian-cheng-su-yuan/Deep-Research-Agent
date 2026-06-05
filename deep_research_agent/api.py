@@ -1,11 +1,22 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from deep_research_agent.models import ResearchRequest, ResearchResponse
 from deep_research_agent.workflow import ResearchWorkflow
 
 app = FastAPI(title="Deep Research Agent", version="0.1.0")
+WEB_DIR = Path(__file__).resolve().parent.parent / "web"
+app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def index() -> FileResponse:
+    return FileResponse(WEB_DIR / "index.html")
 
 
 @app.get("/health")
