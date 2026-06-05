@@ -13,6 +13,10 @@ def test_home_page_serves_frontend_shell():
     assert "Deep Research Agent" in response.text
     assert "research-form" in response.text
     assert "生成报告" in response.text
+    assert "示例主题" in response.text
+    assert "复制报告" in response.text
+    assert "下载 Markdown" in response.text
+    assert "交付演示步骤" in response.text
 
 
 def test_frontend_assets_are_served():
@@ -21,5 +25,9 @@ def test_frontend_assets_are_served():
 
     assert css.status_code == 200
     assert "dashboard-shell" in css.text
+    assert "example-grid" in css.text
+    assert "copy-action" in css.text
     assert js.status_code == 200
     assert "fetch('/api/research'" in js.text
+    assert "downloadMarkdown" in js.text
+    assert "document.execCommand(\"copy\")" in js.text

@@ -26,6 +26,15 @@ def test_research_endpoint_generates_report(tmp_path, monkeypatch):
     assert payload["topic"] == "AI Agent 在企业客服中的应用"
     assert payload["report_path"].endswith(".md")
     assert "# AI Agent 在企业客服中的应用" in payload["markdown"]
+    assert payload["outline"] == [
+        "研究背景与问题定义",
+        "市场现状与关键趋势",
+        "竞争格局与典型玩家",
+        "机会风险与落地路径",
+    ]
+    assert payload["sections_count"] == 4
+    assert payload["sources_count"] == 8
+    assert payload["created_at"]
 
 
 def test_research_endpoint_rejects_blank_topic():

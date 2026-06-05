@@ -37,4 +37,8 @@ def create_research(request: ResearchRequest) -> ResearchResponse:
         markdown=result.markdown,
         report_path=str(result.report_path),
         review=result.review,
+        outline=[section.title for section in result.state.outline.sections] if result.state.outline else [],
+        sections_count=len(result.state.drafts),
+        sources_count=sum(len(draft.sources) for draft in result.state.drafts),
+        created_at=result.state.created_at.isoformat(),
     )

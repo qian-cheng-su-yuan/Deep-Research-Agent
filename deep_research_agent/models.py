@@ -73,3 +73,7 @@ class ResearchResponse(BaseModel):
     markdown: str
     report_path: str
     review: ReviewResult
+    outline: list[str] = Field(default_factory=list)
+    sections_count: int = 0
+    sources_count: int = 0
+    created_at: str

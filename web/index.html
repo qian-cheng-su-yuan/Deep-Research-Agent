@@ -32,6 +32,23 @@
         </div>
       </section>
 
+      <section class="delivery-steps" aria-labelledby="delivery-title">
+        <div class="section-heading compact">
+          <span class="step-dot">0</span>
+          <div>
+            <h2 id="delivery-title">交付演示步骤</h2>
+            <p>按顺序填写必要信息，生成报告后可复制或下载 Markdown。</p>
+          </div>
+        </div>
+        <ol>
+          <li>输入研究主题，建议使用明确的行业、产品或竞品问题。</li>
+          <li>选择 Demo 本地模式，或配置 DeepSeek / Qwen 后切换真实模型。</li>
+          <li>点击生成报告，等待工作流节点全部点亮。</li>
+          <li>检查审核状态、报告路径和预览内容。</li>
+          <li>复制报告或下载 Markdown 文件作为交付物。</li>
+        </ol>
+      </section>
+
       <section class="workspace-grid">
         <form class="control-panel" id="research-form">
           <div class="section-heading">
@@ -52,6 +69,15 @@
               required
             >新能源汽车行业竞争格局分析</textarea>
           </label>
+
+          <div class="example-block">
+            <span>示例主题</span>
+            <div class="example-grid">
+              <button type="button" data-topic="新能源汽车行业竞争格局分析">新能源车竞争</button>
+              <button type="button" data-topic="AI Agent 在企业客服中的应用">企业客服 Agent</button>
+              <button type="button" data-topic="跨境电商 SaaS 市场进入策略">跨境 SaaS 策略</button>
+            </div>
+          </div>
 
           <div class="field-row">
             <label class="field">
@@ -110,6 +136,19 @@
               <small>审核状态</small>
               <strong id="review-status">未开始</strong>
             </div>
+            <div>
+              <small>章节数量</small>
+              <strong id="sections-count">0</strong>
+            </div>
+            <div>
+              <small>资料卡片</small>
+              <strong id="sources-count">0</strong>
+            </div>
+          </div>
+
+          <div class="result-actions" aria-label="报告操作">
+            <button class="copy-action" id="copy-report" type="button" disabled>复制报告</button>
+            <button class="download-action" id="download-report" type="button" disabled>下载 Markdown</button>
           </div>
 
           <article class="report-preview" id="report-preview">

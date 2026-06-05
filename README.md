@@ -106,6 +106,85 @@ curl -X POST http://127.0.0.1:8000/api/research ^
   -d "{\"topic\":\"新能源汽车行业竞争格局分析\",\"demo\":true}"
 ```
 
+## 交付演示步骤
+
+下面是一套从零开始的完整交付流程，适合面试、项目答辩或给他人验收时使用。
+
+### 步骤 1：准备环境
+
+确认本机安装 Python 3.10 或更高版本，然后在项目根目录创建并激活虚拟环境：
+
+```bash
+python -m venv .venv
+.\.venv\Scripts\activate
+python -m pip install -e ".[dev]"
+```
+
+如需使用真实大模型，将 `.env.example` 复制为 `.env`，填写 DeepSeek 或 Qwen Key。没有 Key 时保持 `LLM_PROVIDER=demo` 即可完整跑通。
+
+### 步骤 2：启动服务
+
+```bash
+python -m uvicorn deep_research_agent.api:app --host 127.0.0.1 --port 8000 --reload
+```
+
+如果 8000 端口被占用，可以改用 8001：
+
+```bash
+python -m uvicorn deep_research_agent.api:app --host 127.0.0.1 --port 8001 --reload
+```
+
+### 步骤 3：打开前端工作台
+
+浏览器访问：
+
+```text
+http://127.0.0.1:8000
+```
+
+如果使用 8001 端口，则访问：
+
+```text
+http://127.0.0.1:8001
+```
+
+页面打开后应看到调研任务表单、示例主题、工作流节点、运行结果面板和报告预览区。
+
+### 步骤 4：填写必要信息并生成报告
+
+在前端工作台中填写或选择以下信息：
+
+- 研究主题：例如“新能源汽车行业竞争格局分析”。
+- 模型提供商：无 API Key 时选择 `Demo 本地模式`。
+- 输出目录：默认 `outputs`。
+- Demo 模式：本地演示时保持勾选。
+
+点击“生成报告”后，等待 `Planner -> Searcher -> Writer -> Reviewer -> Exporter` 节点全部点亮。生成完成后，页面会展示：
+
+- 报告路径
+- 审核状态
+- 章节数量
+- 资料卡片数量
+- Markdown 报告预览
+
+此时可以点击“复制报告”复制 Markdown，也可以点击“下载 Markdown”保存为本地文件。
+
+### 步骤 5：运行测试
+
+```bash
+python -m pytest
+```
+
+测试通过后，说明 CLI、API、前端静态资源、工作流、报告导出和文档交付步骤均处于可验收状态。
+
+### 验收标准
+
+- 前端页面可以打开并展示优美的工作台界面。
+- 填写必要信息后可以成功生成报告。
+- 报告包含标题、目录、研究大纲、四个正文章节和结论建议。
+- `outputs/` 目录下生成 Markdown 文件。
+- `python -m pytest` 全部通过。
+
 ## 配置说明
 
 复制 `.env.example` 为 `.env`，按需填写：
