@@ -41,4 +41,5 @@ def create_research(request: ResearchRequest) -> ResearchResponse:
         sections_count=len(result.state.drafts),
         sources_count=sum(len(draft.sources) for draft in result.state.drafts),
         created_at=result.state.created_at.isoformat(),
+        runtime=result.state.runtime,
     )

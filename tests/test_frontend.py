@@ -17,6 +17,9 @@ def test_home_page_serves_frontend_shell():
     assert "复制报告" in response.text
     assert "下载 Markdown" in response.text
     assert "交付演示步骤" in response.text
+    assert "模型状态" in response.text
+    assert "Fallback" in response.text
+    assert "Schema 尝试" in response.text
 
 
 def test_frontend_assets_are_served():
@@ -31,3 +34,4 @@ def test_frontend_assets_are_served():
     assert "fetch('/api/research'" in js.text
     assert "downloadMarkdown" in js.text
     assert "document.execCommand(\"copy\")" in js.text
+    assert "payload.runtime" in js.text

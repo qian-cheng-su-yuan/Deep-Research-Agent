@@ -35,6 +35,9 @@ def test_research_endpoint_generates_report(tmp_path, monkeypatch):
     assert payload["sections_count"] == 4
     assert payload["sources_count"] == 8
     assert payload["created_at"]
+    assert payload["runtime"]["model_name"] == "demo-local"
+    assert payload["runtime"]["fallback_used"] is False
+    assert payload["runtime"]["workflow_steps"] == ["Planner", "Searcher", "Writer", "Reviewer", "Exporter"]
 
 
 def test_research_endpoint_rejects_blank_topic():

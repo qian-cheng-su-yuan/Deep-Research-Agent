@@ -10,3 +10,9 @@ def test_readme_contains_delivery_steps():
     assert "步骤 3：打开前端工作台" in readme
     assert "步骤 4：填写必要信息并生成报告" in readme
     assert "步骤 5：运行测试" in readme
+    assert "`outline`" in readme
+    assert "`sections_count`" in readme
+    assert "`sources_count`" in readme
+    assert "`runtime`" in readme
+    assert "面试演示话术" in readme
+    assert "JSON 解析失败" in readme

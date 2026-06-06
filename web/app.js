@@ -5,6 +5,9 @@ const reportPath = document.querySelector("#report-path");
 const reviewStatus = document.querySelector("#review-status");
 const sectionsCount = document.querySelector("#sections-count");
 const sourcesCount = document.querySelector("#sources-count");
+const modelStatus = document.querySelector("#model-status");
+const fallbackStatus = document.querySelector("#fallback-status");
+const retryCount = document.querySelector("#retry-count");
 const nodes = Array.from(document.querySelectorAll("#pipeline span"));
 const submitButton = form.querySelector("button[type='submit']");
 const copyButton = document.querySelector("#copy-report");
@@ -153,6 +156,9 @@ form.addEventListener("submit", async (event) => {
   reviewStatus.textContent = "运行中";
   sectionsCount.textContent = "0";
   sourcesCount.textContent = "0";
+  modelStatus.textContent = "运行中";
+  fallbackStatus.textContent = "否";
+  retryCount.textContent = "0";
   setPipeline(1);
 
   try {
@@ -179,6 +185,9 @@ form.addEventListener("submit", async (event) => {
     reviewStatus.textContent = payload.review.passed ? "通过" : "需检查";
     sectionsCount.textContent = String(payload.sections_count || 0);
     sourcesCount.textContent = String(payload.sources_count || 0);
+    modelStatus.textContent = payload.runtime?.model_name || "unknown";
+    fallbackStatus.textContent = payload.runtime?.fallback_used ? "已启用" : "否";
+    retryCount.textContent = String(payload.runtime?.structured_retries || 0);
     reportPreview.innerHTML = markdownToHtml(payload.markdown);
     setReportActions(true);
     message.textContent = "报告生成完成。";
@@ -188,6 +197,9 @@ form.addEventListener("submit", async (event) => {
     reportPath.textContent = "未生成";
     sectionsCount.textContent = "0";
     sourcesCount.textContent = "0";
+    modelStatus.textContent = "失败";
+    fallbackStatus.textContent = "未知";
+    retryCount.textContent = "0";
     reportPreview.innerHTML = `
       <div class="empty-state">
         <h3>生成失败</h3>

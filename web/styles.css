@@ -82,7 +82,7 @@ h1 {
 
 .metric-strip {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   min-width: 420px;
 }
@@ -356,7 +356,7 @@ input:focus {
 
 .status-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 150px 120px 120px;
+  grid-template-columns: minmax(0, 1fr) 120px 100px 100px 140px 100px 110px;
   gap: 12px;
   margin-bottom: 18px;
 }

@@ -10,6 +10,7 @@ Deep Research Agent 是一个面向行业调研、竞品分析和市场分析的
 - 使用可替换检索接口聚合章节资料，默认提供本地模拟检索。
 - 按章节生成长文草稿，并将资料片段纳入报告内容。
 - 使用 Pydantic 对请求、状态、大纲、检索结果和输出响应做结构化校验。
+- 对大模型 JSON 输出进行解析、Schema 校验、错误反馈、自动重试和 fallback。
 - 对报告完整性进行基础审核，检查大纲、章节、引用和结论是否齐备。
 - 导出标准 Markdown 文件，适合继续人工修改、发布或转成其他格式。
 - 同时提供命令行和 FastAPI 接口，便于本地演示和后端集成。
@@ -36,13 +37,17 @@ Deep-Research-Agent/
 │   ├── llm.py          # Demo / DeepSeek / Qwen LLM 客户端
 │   ├── models.py       # Pydantic 数据结构
 │   ├── search.py       # 可替换检索器
+│   ├── structured_output.py # JSON 解析、Schema 校验、重试与 fallback
 │   └── workflow.py     # 多节点 Agent 工作流
 ├── examples/
 │   └── sample_report.md
 ├── tests/
 │   ├── test_api.py
 │   ├── test_cli.py
+│   ├── test_frontend.py
 │   ├── test_llm.py
+│   ├── test_readme.py
+│   ├── test_structured_output.py
 │   └── test_workflow.py
 ├── web/
 │   ├── index.html      # 前端工作台
@@ -245,6 +250,29 @@ REPORT_OUTPUT_DIR=outputs
 - `markdown`：完整 Markdown 报告内容。
 - `report_path`：本地报告文件路径。
 - `review`：审核结果与问题列表。
+- `outline`：结构化大纲标题列表。
+- `sections_count`：最终生成的章节数量。
+- `sources_count`：本地检索资料卡片数量。
+- `created_at`：报告生成时间。
+- `runtime`：运行元信息，包含 `provider`、`model_name`、`fallback_used`、`structured_retries`、`structured_errors` 和 `workflow_steps`。
+
+响应示例：
+
+```json
+{
+  "topic": "新能源汽车行业竞争格局分析",
+  "report_path": "outputs/新能源汽车行业竞争格局分析.md",
+  "sections_count": 4,
+  "sources_count": 8,
+  "runtime": {
+    "provider": "demo",
+    "model_name": "demo-local",
+    "fallback_used": false,
+    "structured_retries": 5,
+    "workflow_steps": ["Planner", "Searcher", "Writer", "Reviewer", "Exporter"]
+  }
+}
+```
 
 ## 测试
 
@@ -261,6 +289,18 @@ python -m pytest
 - CLI 能生成报告文件。
 - Demo LLM 输出稳定。
 - API 调用重试逻辑可处理临时失败。
+- 结构化 JSON 输出能完成解析、Pydantic 校验、失败重试和 fallback。
+
+## 面试演示话术
+
+可以按下面顺序向面试官介绍：
+
+1. 这个项目解决的是长文本调研生成中的结构混乱、内容遗漏和上下文遗忘问题。
+2. 我没有让模型一次性生成整篇文章，而是拆成 `Planner -> Searcher -> Writer -> Reviewer -> Exporter` 多节点工作流。
+3. `ResearchState` 是共享状态，负责在节点之间传递主题、大纲、检索结果、章节草稿和最终报告。
+4. 大模型输出不是直接信任，而是先要求 JSON，再用 Pydantic 做 Schema 校验；如果出现 JSON 解析失败、字段缺失或类型错误，会把错误反馈给模型并自动重试。
+5. 如果连续失败，系统会 fallback 到本地 demo 输出，保证面试演示和本地运行不中断。
+6. 前端工作台用于演示完整闭环：填写主题、选择模型模式、生成报告、查看节点状态、复制或下载 Markdown。
 
 ## 与简历项目的对应关系
 
@@ -268,8 +308,8 @@ python -m pytest
 
 - 多节点工作流：代码中明确拆分 Planner、Searcher、Writer、Reviewer、Exporter。
 - 状态管理机制：`ResearchState` 在节点之间传递主题、大纲、检索结果、草稿和报告。
-- 结构化数据校验：使用 Pydantic 定义请求、状态、大纲、章节和响应 Schema。
-- 异常处理与稳定性：LLM 客户端提供重试封装，缺少 Key 时自动回退 demo 模式。
+- 结构化数据校验：使用 Pydantic 定义请求、状态、大纲、章节、结构化模型输出和响应 Schema。
+- 异常处理与稳定性：LLM 客户端和结构化输出层提供重试封装；当 JSON 解析失败、字段缺失、类型错误或缺少 Key 时，系统会自动重试或回退 demo 模式。
 - 项目产出：输入主题后自动生成结构化 Markdown 报告。
 
 ## 后续扩展方向

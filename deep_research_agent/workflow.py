@@ -10,30 +10,57 @@ from deep_research_agent.models import (
     ResearchSection,
     ResearchState,
     ReviewResult,
+    SectionContent,
     SectionDraft,
+    WorkflowRuntime,
     WorkflowResult,
 )
 from deep_research_agent.search import LocalSearchProvider
+from deep_research_agent.structured_output import StructuredOutputRunner
 
 
 class Planner:
-    def plan(self, topic: str) -> ResearchOutline:
-        sections = [
-            ResearchSection(title="研究背景与问题定义", description="说明主题背景、核心问题和分析边界。", keywords=["背景", "问题"]),
-            ResearchSection(title="市场现状与关键趋势", description="梳理市场规模、技术演进和用户需求变化。", keywords=["市场", "趋势"]),
-            ResearchSection(title="竞争格局与典型玩家", description="分析主要参与者、差异化能力和竞争壁垒。", keywords=["竞争", "玩家"]),
-            ResearchSection(title="机会风险与落地路径", description="总结机会窗口、潜在风险和实施建议。", keywords=["机会", "风险"]),
-        ]
-        return ResearchOutline(topic=topic, sections=sections)
+    def __init__(self, client, runner: StructuredOutputRunner):
+        self.client = client
+        self.runner = runner
+
+    def plan(self, topic: str):
+        return self.runner.generate(
+            lambda feedback: self.client.complete_json("outline", topic, feedback=feedback),
+            ResearchOutline,
+            lambda: self.fallback_outline(topic),
+        )
+
+    @staticmethod
+    def fallback_outline(topic: str) -> ResearchOutline:
+        return ResearchOutline(
+            topic=topic,
+            sections=[
+                ResearchSection(title="研究背景与问题定义", description="说明主题背景、核心问题和分析边界。", keywords=["背景", "问题"]),
+                ResearchSection(title="市场现状与关键趋势", description="梳理市场规模、技术演进和用户需求变化。", keywords=["市场", "趋势"]),
+                ResearchSection(title="竞争格局与典型玩家", description="分析主要参与者、差异化能力和竞争壁垒。", keywords=["竞争", "玩家"]),
+                ResearchSection(title="机会风险与落地路径", description="总结机会窗口、潜在风险和实施建议。", keywords=["机会", "风险"]),
+            ],
+        )
 
 
 class Writer:
-    def __init__(self, provider: str, demo: bool):
-        self.settings = load_settings()
-        self.client = build_llm_client(provider, self.settings, demo)
+    def __init__(self, client, runner: StructuredOutputRunner):
+        self.client = client
+        self.runner = runner
 
-    def write(self, topic: str, section: ResearchSection, sources: list[str]) -> str:
-        return self.client.complete(topic, section.title, sources)
+    def write(self, topic: str, section: ResearchSection, sources: list[str]):
+        return self.runner.generate(
+            lambda feedback: self.client.complete_json(
+                "section",
+                topic,
+                section_title=section.title,
+                source_snippets=sources,
+                feedback=feedback,
+            ),
+            SectionContent,
+            lambda: SectionContent(title=section.title, content=self.client.complete(topic, section.title, sources)),
+        )
 
 
 class Reviewer:
@@ -56,14 +83,17 @@ class ResearchWorkflow:
         output_dir: str | Path | None = None,
         provider: str = "demo",
         demo: bool = True,
+        llm_client=None,
     ):
         settings = load_settings()
         self.output_dir = Path(output_dir) if output_dir else settings.output_dir
         self.provider = provider
         self.demo = demo
-        self.planner = Planner()
+        self.client = llm_client or build_llm_client(provider, settings, demo)
+        self.runner = StructuredOutputRunner(retries=max(1, settings.api_retries))
+        self.planner = Planner(self.client, self.runner)
         self.searcher = LocalSearchProvider()
-        self.writer = Writer(provider=provider, demo=demo)
+        self.writer = Writer(self.client, self.runner)
         self.reviewer = Reviewer()
         self.exporter = MarkdownExporter(self.output_dir)
 
@@ -73,19 +103,40 @@ class ResearchWorkflow:
             raise ValueError("topic must not be blank")
 
         state = ResearchState(topic=normalized_topic)
-        state.outline = self.planner.plan(normalized_topic)
+        state.runtime = WorkflowRuntime(
+            provider=getattr(self.client, "provider", self.provider),
+            model_name=getattr(self.client, "model_name", "unknown"),
+            workflow_steps=["Planner"],
+        )
+        outline_result = self.planner.plan(normalized_topic)
+        self._record_structured_result(state, outline_result)
+        state.outline = outline_result.value
 
+        state.runtime.workflow_steps.append("Searcher")
         for section in state.outline.sections:
             results = self.searcher.search(normalized_topic, section)
             state.search_results[section.title] = results
             snippets = [item.snippet for item in results]
-            content = self.writer.write(normalized_topic, section, snippets)
-            state.drafts.append(SectionDraft(title=section.title, content=content, sources=results))
+            if "Writer" not in state.runtime.workflow_steps:
+                state.runtime.workflow_steps.append("Writer")
+            content_result = self.writer.write(normalized_topic, section, snippets)
+            self._record_structured_result(state, content_result)
+            state.drafts.append(
+                SectionDraft(title=content_result.value.title, content=content_result.value.content, sources=results)
+            )
 
         state.markdown = self._render_markdown(state)
+        state.runtime.workflow_steps.append("Reviewer")
         review = self.reviewer.review(state)
+        state.runtime.workflow_steps.append("Exporter")
         report_path = self.exporter.export(state)
         return WorkflowResult(state=state, review=review, markdown=state.markdown, report_path=report_path)
+
+    def _record_structured_result(self, state: ResearchState, result) -> None:
+        if result.used_fallback:
+            state.runtime.fallback_used = True
+        state.runtime.structured_retries += result.attempts
+        state.runtime.structured_errors.extend(result.errors)
 
     def _render_markdown(self, state: ResearchState) -> str:
         assert state.outline is not None
