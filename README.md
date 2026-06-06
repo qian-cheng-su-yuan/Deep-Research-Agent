@@ -211,6 +211,12 @@ REPORT_OUTPUT_DIR=outputs
 
 如果选择真实模型但没有配置对应 Key，系统会自动回退到 demo 模式，保证流程不中断。
 
+### 真实模型 JSON 鲁棒性
+
+真实 DeepSeek / Qwen 调用时，模型不一定只返回纯 JSON，也可能返回 non-pure JSON，例如在 JSON 外层包一段说明文字，或者用 Markdown code fence 包裹 `json` 内容。项目的 `structured_output.py` 会先从返回文本中提取第一个完整 JSON 对象，再交给 Pydantic Schema 校验。
+
+如果提取失败、JSON 解析失败、字段缺失或类型不匹配，系统会把校验错误作为 feedback 传回模型并自动重试；连续失败后回退到本地 demo 输出，保证 CLI、API 和前端演示不会中断。这个机制对应简历中“结构化输出校验 + JSON 解析失败重试”的核心能力。
+
 ## 工作流设计
 
 1. `Planner`：根据主题生成结构化研究大纲。
@@ -298,7 +304,7 @@ python -m pytest
 1. 这个项目解决的是长文本调研生成中的结构混乱、内容遗漏和上下文遗忘问题。
 2. 我没有让模型一次性生成整篇文章，而是拆成 `Planner -> Searcher -> Writer -> Reviewer -> Exporter` 多节点工作流。
 3. `ResearchState` 是共享状态，负责在节点之间传递主题、大纲、检索结果、章节草稿和最终报告。
-4. 大模型输出不是直接信任，而是先要求 JSON，再用 Pydantic 做 Schema 校验；如果出现 JSON 解析失败、字段缺失或类型错误，会把错误反馈给模型并自动重试。
+4. 大模型输出不是直接信任，而是先要求 JSON，再从可能带有说明文字或 Markdown code fence 的 non-pure JSON 中提取结构化对象，并用 Pydantic 做 Schema 校验；如果出现 JSON 解析失败、字段缺失或类型错误，会把错误反馈给模型并自动重试。
 5. 如果连续失败，系统会 fallback 到本地 demo 输出，保证面试演示和本地运行不中断。
 6. 前端工作台用于演示完整闭环：填写主题、选择模型模式、生成报告、查看节点状态、复制或下载 Markdown。
 

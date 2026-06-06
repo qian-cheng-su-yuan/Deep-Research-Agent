@@ -35,3 +35,12 @@ def test_frontend_assets_are_served():
     assert "downloadMarkdown" in js.text
     assert "document.execCommand(\"copy\")" in js.text
     assert "payload.runtime" in js.text
+
+
+def test_status_grid_uses_responsive_metric_layout():
+    css = client.get("/static/styles.css")
+
+    assert css.status_code == 200
+    assert ".status-grid" in css.text
+    assert "repeat(auto-fit" in css.text
+    assert "minmax(140px" in css.text

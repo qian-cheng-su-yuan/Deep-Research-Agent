@@ -43,6 +43,40 @@ def test_structured_output_retries_invalid_json_then_succeeds():
     assert result.errors
 
 
+def test_structured_output_extracts_json_from_code_fence():
+    runner = StructuredOutputRunner(retries=2)
+
+    result = runner.generate(
+        lambda feedback: """```json
+{"topic":"topic","sections":[{"title":"A","description":"B","keywords":["k"]}]}
+```""",
+        ResearchOutline,
+        fallback_outline,
+    )
+
+    assert result.value.sections[0].title == "A"
+    assert result.used_fallback is False
+    assert result.attempts == 1
+
+
+def test_structured_output_extracts_json_from_explanatory_text():
+    runner = StructuredOutputRunner(retries=2)
+
+    result = runner.generate(
+        lambda feedback: (
+            "Here is the JSON you requested:\n"
+            '{"topic":"topic","sections":[{"title":"A","description":"B","keywords":["k"]}]}\n'
+            "This follows the schema."
+        ),
+        ResearchOutline,
+        fallback_outline,
+    )
+
+    assert result.value.sections[0].title == "A"
+    assert result.used_fallback is False
+    assert result.attempts == 1
+
+
 def test_structured_output_falls_back_after_validation_failures():
     runner = StructuredOutputRunner(retries=2)
 

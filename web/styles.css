@@ -356,9 +356,13 @@ input:focus {
 
 .status-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 120px 100px 100px 140px 100px 110px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px;
   margin-bottom: 18px;
+}
+
+.status-grid div:first-child {
+  grid-column: span 2;
 }
 
 .status-grid div {
@@ -486,6 +490,10 @@ input:focus {
   .status-grid,
   .delivery-steps ol {
     grid-template-columns: 1fr;
+  }
+
+  .status-grid div:first-child {
+    grid-column: auto;
   }
 
   .result-actions {

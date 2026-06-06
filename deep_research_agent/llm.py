@@ -124,10 +124,29 @@ class HTTPChatLLMClient(BaseLLMClient):
             )
             try:
                 with request.urlopen(http_request, timeout=self.settings.api_timeout_seconds) as response:
-                    payload = json.loads(response.read().decode("utf-8"))
+                    raw_body = response.read()
             except error.HTTPError as exc:
                 raise ValueError(f"LLM provider returned HTTP {exc.code}") from exc
-            return payload["choices"][0]["message"]["content"].strip()
+
+            if not raw_body:
+                raise ValueError("LLM provider returned empty response")
+
+            try:
+                payload = json.loads(raw_body.decode("utf-8"))
+            except json.JSONDecodeError as exc:
+                raise ValueError("LLM provider returned invalid JSON response") from exc
+
+            choices = payload.get("choices") if isinstance(payload, dict) else None
+            if not isinstance(choices, list) or not choices:
+                raise ValueError("LLM provider response missing choices")
+
+            first_choice = choices[0]
+            message = first_choice.get("message") if isinstance(first_choice, dict) else None
+            content = message.get("content") if isinstance(message, dict) else None
+            if not isinstance(content, str) or not content.strip():
+                raise ValueError("LLM provider response missing message content")
+
+            return content.strip()
 
         return retry_call(request_once, retries=max(1, self.settings.api_retries), delay_seconds=0.5)
 
