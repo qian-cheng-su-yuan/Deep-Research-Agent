@@ -8,6 +8,7 @@ const sourcesCount = document.querySelector("#sources-count");
 const modelStatus = document.querySelector("#model-status");
 const fallbackStatus = document.querySelector("#fallback-status");
 const retryCount = document.querySelector("#retry-count");
+const healthStatus = document.querySelector("#health-status");
 const nodes = Array.from(document.querySelectorAll("#pipeline span"));
 const submitButton = form.querySelector("button[type='submit']");
 const copyButton = document.querySelector("#copy-report");
@@ -84,6 +85,21 @@ function setReportActions(enabled) {
   downloadButton.disabled = !enabled;
 }
 
+async function checkHealth() {
+  if (!healthStatus) return;
+  healthStatus.textContent = "服务检查中";
+  healthStatus.className = "status-pill checking";
+  try {
+    const response = await fetch("/health");
+    if (!response.ok) throw new Error("health check failed");
+    healthStatus.textContent = "服务在线";
+    healthStatus.className = "status-pill online";
+  } catch (error) {
+    healthStatus.textContent = "服务异常";
+    healthStatus.className = "status-pill offline";
+  }
+}
+
 function downloadMarkdown() {
   if (!latestMarkdown) return;
   const blob = new Blob([latestMarkdown], { type: "text/markdown;charset=utf-8" });
@@ -137,6 +153,7 @@ document.querySelectorAll("[data-topic]").forEach((button) => {
 
 copyButton.addEventListener("click", copyMarkdown);
 downloadButton.addEventListener("click", downloadMarkdown);
+checkHealth();
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -182,7 +199,7 @@ form.addEventListener("submit", async (event) => {
     latestMarkdown = payload.markdown;
     latestTopic = payload.topic;
     reportPath.textContent = payload.report_path;
-    reviewStatus.textContent = payload.review.passed ? "通过" : "需检查";
+    reviewStatus.textContent = payload.review.passed ? "通过" : "需要检查";
     sectionsCount.textContent = String(payload.sections_count || 0);
     sourcesCount.textContent = String(payload.sources_count || 0);
     modelStatus.textContent = payload.runtime?.model_name || "unknown";

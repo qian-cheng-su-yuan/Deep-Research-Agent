@@ -10,11 +10,19 @@
     <main class="dashboard-shell">
       <section class="hero-panel" aria-labelledby="page-title">
         <div class="hero-copy">
+          <div class="hero-badges" aria-label="项目状态">
+            <span>研究工作台</span>
+            <span class="status-pill checking" id="health-status">服务检查中</span>
+          </div>
           <p class="eyebrow">Planner · Searcher · Writer · Reviewer · Exporter</p>
           <h1 id="page-title">Deep Research Agent</h1>
           <p class="lead">
-            输入一个调研主题，自动拆解大纲、检索资料、撰写章节并导出结构化 Markdown 报告。
+            输入研究主题，系统会自动规划大纲、检索资料、撰写章节、审核结构并导出可交付的 Markdown 调研报告。
           </p>
+          <div class="hero-actions">
+            <a href="#research-form">开始研究</a>
+            <a href="https://github.com/qian-cheng-su-yuan/Deep-Research-Agent" target="_blank" rel="noreferrer">查看仓库</a>
+          </div>
         </div>
         <div class="metric-strip" aria-label="工作流概览">
           <div>
@@ -26,8 +34,8 @@
             <span>报告输出</span>
           </div>
           <div>
-            <strong>Demo</strong>
-            <span>无 Key 可演示</span>
+            <strong>本地模式</strong>
+            <span>无 Key 可运行</span>
           </div>
           <div>
             <strong>Schema</strong>
@@ -40,16 +48,16 @@
         <div class="section-heading compact">
           <span class="step-dot">0</span>
           <div>
-            <h2 id="delivery-title">交付演示步骤</h2>
-            <p>按顺序填写必要信息，生成报告后可复制或下载 Markdown。</p>
+            <h2 id="delivery-title">项目运行步骤</h2>
+            <p>按顺序准备配置、启动服务、填写主题并生成报告，完整流程可直接用于项目交付验收。</p>
           </div>
         </div>
         <ol>
-          <li>输入研究主题，建议使用明确的行业、产品或竞品问题。</li>
-          <li>选择 Demo 本地模式，或配置 DeepSeek / Qwen 后切换真实模型。</li>
-          <li>点击生成报告，等待工作流节点全部点亮。</li>
-          <li>检查审核状态、报告路径和预览内容。</li>
-          <li>复制报告或下载 Markdown 文件作为交付物。</li>
+          <li>安装依赖并按需复制 `.env.example` 为 `.env`。</li>
+          <li>无 Key 时使用本地模式，接入 DeepSeek / Qwen 后切换真实模型。</li>
+          <li>启动 FastAPI 服务并确认页面显示服务状态。</li>
+          <li>填写研究主题、模型提供商和输出目录后生成报告。</li>
+          <li>检查审核状态、报告路径和 Markdown 内容，再复制或下载交付文件。</li>
         </ol>
       </section>
 
@@ -61,6 +69,11 @@
               <h2>调研任务</h2>
               <p>配置主题、模型模式和输出目录。</p>
             </div>
+          </div>
+
+          <div class="config-note">
+            <strong>需要填写的信息</strong>
+            <span>前端只填写研究主题、模型提供商和输出目录；真实模型 API Key 请写入项目根目录 `.env`，不要在浏览器中输入敏感信息。</span>
           </div>
 
           <label class="field">
@@ -77,7 +90,7 @@
           <div class="example-block">
             <span>示例主题</span>
             <div class="example-grid">
-              <button type="button" data-topic="新能源汽车行业竞争格局分析">新能源车竞争</button>
+              <button type="button" data-topic="新能源汽车行业竞争格局分析">新能源汽车竞争</button>
               <button type="button" data-topic="AI Agent 在企业客服中的应用">企业客服 Agent</button>
               <button type="button" data-topic="跨境电商 SaaS 市场进入策略">跨境 SaaS 策略</button>
             </div>
@@ -87,9 +100,9 @@
             <label class="field">
               <span>模型提供商</span>
               <select id="provider" name="provider">
-                <option value="demo">Demo 本地模式</option>
-                <option value="deepseek">DeepSeek</option>
-                <option value="qwen">Qwen</option>
+                <option value="demo">本地模式（无 Key 可运行）</option>
+                <option value="deepseek">DeepSeek 真实模型</option>
+                <option value="qwen">Qwen 真实模型</option>
               </select>
             </label>
 
@@ -101,7 +114,7 @@
 
           <label class="toggle-row">
             <input id="demo" type="checkbox" checked />
-            <span>使用 Demo 模式，适合无 API Key 的本地演示</span>
+            <span>强制使用本地模式；关闭后将按模型提供商读取 `.env` 中的真实模型 Key。</span>
           </label>
 
           <button class="primary-action" type="submit">

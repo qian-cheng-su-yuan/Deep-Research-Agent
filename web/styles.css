@@ -25,6 +25,10 @@ body {
   font-family: Inter, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 button,
 input,
 select,
@@ -46,8 +50,57 @@ textarea {
   padding: 34px;
   border: 1px solid rgba(219, 227, 239, 0.9);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.88);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 252, 252, 0.92)),
+    var(--panel);
   box-shadow: var(--shadow);
+}
+
+.hero-copy {
+  min-width: 0;
+}
+
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.hero-badges span,
+.hero-actions a,
+.config-note strong {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.hero-badges span {
+  padding: 0 12px;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  color: var(--accent-strong);
+  background: rgba(15, 118, 110, 0.08);
+}
+
+.hero-badges .status-pill.checking {
+  border-color: rgba(180, 83, 9, 0.22);
+  color: var(--amber);
+  background: rgba(180, 83, 9, 0.08);
+}
+
+.hero-badges .status-pill.online {
+  border-color: rgba(15, 118, 110, 0.22);
+  color: var(--accent-strong);
+  background: rgba(15, 118, 110, 0.1);
+}
+
+.hero-badges .status-pill.offline {
+  border-color: rgba(220, 38, 38, 0.22);
+  color: #b91c1c;
+  background: rgba(220, 38, 38, 0.08);
 }
 
 .eyebrow {
@@ -70,6 +123,7 @@ h1 {
   font-size: clamp(36px, 5vw, 62px);
   line-height: 1;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .lead {
@@ -78,6 +132,38 @@ h1 {
   color: var(--muted);
   font-size: 18px;
   line-height: 1.7;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.hero-actions a {
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: #ffffff;
+  text-decoration: none;
+}
+
+.hero-actions a:first-child {
+  border-color: rgba(15, 118, 110, 0.2);
+  color: #ffffff;
+  background: var(--accent);
+}
+
+.hero-actions a:hover {
+  border-color: rgba(15, 118, 110, 0.45);
+  color: var(--accent-strong);
+  background: rgba(15, 118, 110, 0.08);
+}
+
+.hero-actions a:first-child:hover {
+  color: #ffffff;
+  background: var(--accent-strong);
 }
 
 .metric-strip {
@@ -160,6 +246,29 @@ h1 {
 .control-panel,
 .result-panel {
   padding: 24px;
+}
+
+.config-note {
+  display: grid;
+  gap: 8px;
+  margin: -4px 0 18px;
+  padding: 14px;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 8px;
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.config-note strong {
+  width: fit-content;
+  padding: 0 10px;
+  color: var(--blue);
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.config-note span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
 }
 
 .section-heading {
@@ -481,6 +590,11 @@ input:focus {
   .control-panel,
   .result-panel {
     padding: 18px;
+  }
+
+  h1 {
+    font-size: 32px;
+    line-height: 1.08;
   }
 
   .metric-strip,
